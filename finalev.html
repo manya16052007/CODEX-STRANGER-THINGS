@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stranger Things - Hawkins Terminal</title>
+    <link href="https://fonts.cdnfonts.com/css/itc-benguiat" rel="stylesheet">
+    <style>
+        :root {
+            --monitor-color: #1a1a1a;
+            --screen-bg: #141b1e;
+            --alert-red: #ff3e3e;
+            --alert-amber: #ffb000;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                        url("https://images.unsplash.com/photo-1614851099511-773084f6911d");
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* --- PERSISTENT BRANDING (TOP CORNERS) --- */
+        .hawkins-branding {
+            position: absolute;
+            top: 30px;
+            left: 40px;
+            z-index: 100;
+        }
+
+        .lights-string {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 5px;
+        }
+
+        .bulb {
+            width: 12px;
+            height: 18px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px white;
+            animation: bulb-flicker 1.5s infinite alternate;
+        }
+        .bulb:nth-child(1) { background: #fdfd96; box-shadow: 0 0 15px #fdfd96; }
+        .bulb:nth-child(2) { background: #ff6961; animation-delay: 0.2s; }
+        .bulb:nth-child(3) { background: #77dd77; animation-delay: 0.4s; }
+        .bulb:nth-child(4) { background: #84b6f4; animation-delay: 0.1s; }
+
+        .hawkins-label {
+            font-family: 'ITC Benguiat', serif;
+            font-size: 45px;
+            color: #e21d1d;
+            text-transform: uppercase;
+            font-weight: 900;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.9);
+        }
+
+        .logo-branding {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            z-index: 100;
+        }
+
+        .st-logo-img {
+            width: 280px;
+            filter: drop-shadow(0 0 10px red);
+        }
+
+        /* --- PAGE 1: CENTERED LOGIN --- */
+        #page-login {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            z-index: 20;
+            transition: transform 0.8s ease-in-out, opacity 0.5s;
+        }
+
+        .run-text {
+            font-family: 'ITC Benguiat', serif;
+            font-size: 85px;
+            color: #ff0000;
+            font-weight: bold;
+            text-shadow: 4px 4px 15px black;
+        }
+
+        .login-box {
+            background-color: #011638; /* Deep blue */
+            border: 4px solid #ff3131; /* Neon red border */
+            border-radius: 20px;
+            padding: 40px;
+            width: 420px;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
+            text-align: center;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 15px;
+            background-color: #002559;
+            border: 2px solid #ffffff; /* White border as requested */
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .login-action {
+            margin-top: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 22px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .login-action:hover { text-shadow: 0 0 10px white; transform: scale(1.1); }
+
+        /* --- PAGE 2: TERMINAL OVERRIDE --- */
+        #page-terminal {
+            display: none; /* Hidden by default */
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        .monitor-frame {
+            width: 750px;
+            height: 580px;
+            background: var(--monitor-color);
+            border-radius: 40px;
+            padding: 30px;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.9);
+            position: relative;
+            border: 4px solid #111;
+        }
+
+        .screen {
+            width: 100%; height: 100%;
+            background: var(--screen-bg);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 15px solid #000;
+        }
+
+        .screen::after {
+            content: "";
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            z-index: 5;
+            animation: crt-flicker 0.15s infinite;
+        }
+
+        .terminal-content {
+            padding: 25px;
+            color: #d1dadd;
+            text-transform: uppercase;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .status-header {
+            color: var(--alert-red);
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+            border-bottom: 1px solid var(--alert-red);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .alert-box {
+            background: var(--alert-amber);
+            color: black;
+            padding: 6px;
+            margin-bottom: 8px;
+            font-weight: 900;
+        }
+
+        table { width: 100%; margin-top: 10px; border-collapse: collapse; }
+        th { text-align: left; color: var(--alert-amber); border-bottom: 1px solid #444; }
+        td { padding: 4px 0; }
+
+        .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .btn { padding: 10px; text-align: center; font-weight: bold; cursor: pointer; border: none; }
+        .btn-red { background: var(--alert-red); color: white; }
+        .btn-blue { background: #2b5d75; color: white; }
+
+        /* Animations */
+        @keyframes crt-flicker { 0% { opacity: 0.98; } 100% { opacity: 1; } }
+        @keyframes bulb-flicker { 0% { opacity: 0.4; } 100% { opacity: 1; } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+    </style>
+</head>
+<body>
+
+    <div class="hawkins-branding">
+        <div class="lights-string">
+            <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+        </div>
+        <div class="hawkins-label">HAWKINS</div>
+    </div>
+
+    <div class="logo-branding">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/3/38/Stranger_Things_logo.png" class="st-logo-img" alt="Logo">
+    </div>
+
+    <div id="page-login">
+        <div class="run-text">RUN!</div>
+        <div class="login-box">
+            <input type="text" placeholder="Username">
+            <input type="email" placeholder="Email">
+            <input type="tel" placeholder="Phone Number">
+            <input type="text" placeholder="Registration Number">
+            <div class="login-action" onclick="showTerminal()">LOGIN</div>
+        </div>
+    </div>
+
+    <div id="page-terminal">
+        <div class="monitor-frame">
+            <div class="screen">
+                <div class="terminal-content">
+                    <div class="status-header">HEAS STATUS: CRITICAL - CODE RED</div>
+                    <div class="alert-box">⚠️ DIMENSIONAL BREACH DETECTED</div>
+                    <div class="alert-box">⚠️ VECNA PROTOCOL ACTIVE</div>
+                    
+                    <div style="border: 1px solid #444; padding: 10px; background: rgba(0,0,0,0.4);">
+                        <strong>SURVIVAL DASHBOARD</strong><br>
+                        Location Status Tracking:
+                        <table>
+                            <thead><tr><th>Area</th><th>Status</th><th>Risk</th></tr></thead>
+                            <tbody>
+                                <tr><td>Mirkwood</td><td>OCCUPIED</td><td>100%</td></tr>
+                                <tr><td>Hawkins Lab</td><td>BREACHED</td><td>95%</td></tr>
+                                <tr><td>Downtown</td><td>EVACUATING</td><td>75%</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div style="color: var(--alert-red); text-align: center; margin-top: 15px; font-weight: bold;">
+                        SYSTEM OVERRIDE: DO NOT INVESTIGATE LIGHTS
+                    </div>
+
+                    <div class="btn-row">
+                        <div class="btn btn-red">EVACUATE</div>
+                        <div class="btn btn-blue" onclick="showLogin()">LOGOUT</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTerminal() {
+            document.getElementById('page-login').style.transform = 'translateY(-100vh)';
+            document.getElementById('page-login').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('page-login').style.display = 'none';
+                document.getElementById('page-terminal').style.display = 'block';
+                setTimeout(() => { document.getElementById('page-terminal').style.opacity = '1'; }, 50);
+            }, 500);
+        }
+
+        function showLogin() {
+            document.getElementById('page-terminal').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('page-terminal').style.display = 'none';
+                document.getElementById('page-login').style.display = 'flex';
+                setTimeout(() => { 
+                    document.getElementById('page-login').style.transform = 'translateY(0)';
+                    document.getElementById('page-login').style.opacity = '1'; 
+                }, 50);
+            }, 500);
+        }
+    </script>
+</body>
+</html>
